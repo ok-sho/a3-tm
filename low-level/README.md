@@ -11,13 +11,13 @@ This folder contains the turing machine transition states as well as the Laconic
 - **Repository:** https://github.com/adamyedidia/parsimony
 - **What he created:** The entire Laconic language and the compiler that converts Laconic code to Turing machines
 
-**My contribution:** I wrote `pi30.lca` (the Laconic source code) and compiled it using his tools to produce `pi30.tm2`.
+**My contribution:** I wrote `pi30.lac` (the Laconic source code) and compiled it using his tools to produce `pi30.tm2`.
 
 To reproduce this work, you must clone Yedidia's repository and follow his tutorial. The files in this repository (`pi30.lca` and `pi30.tm2`) are the output of using his language and compiler, not new tools I built.
 
 ---
 
-## Laconic File: `pi30.lca`
+## Laconic File: `pi30.lac`
 
 My implementation of the Rabinowitz-Wagon spigot algorithm for calculating digits of PI. I chose this algorithm due to its simple arithmetic as well as sequential generation of the digits.
 
