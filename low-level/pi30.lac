@@ -1,0 +1,131 @@
+func init_array(N, A, i) {
+    A = [];
+    i = 0;
+    while (i < N) {
+        A = A^2;
+        i = i + 1;
+    }
+    return;
+}
+
+func integer_division(divident, divisor, quotient, remainder) {
+    while (divident >= divisor) {
+        divident = divident - divisor;
+        quotient = quotient + 1;
+    }
+    remainder = divident;
+    return;
+}
+
+func assign_at_index(old, new, loc, index, len, value) {
+    new = [];
+    index = 0;
+    while (index < len) {
+        if (index == loc) {
+            new = new^value;
+        } if (index != loc) {
+            new = new^(old@index);
+        }
+        index = index + 1;
+    }
+    old = new;
+    return;
+}
+
+func pi_spigot(n, N, A, pi_digits, carry, digit_count, i, x, new_A, j, divident, divisor, remainder, quotient, nines, predigit) {
+    N = ((10 * n) / 3);
+    print N;
+    init_array(N, A, i);
+    pi_digits = [];
+    digit_count = 0;
+    nines = 0;
+    predigit = 0;
+    
+    while (digit_count < n) {
+        print digit_count;
+        carry = 0;
+        i = N - 1;
+        
+        while (i >= 0) {
+            x = (A@i) * 10;
+            x = x + (carry * (i + 1));
+            divisor = (2 * (i + 1)) - 1;
+            remainder = 0;
+            divident = x;
+            quotient = 0;
+            integer_division(divident, divisor, quotient, remainder);
+
+
+            assign_at_index(A, new_A, i, j, N, remainder)
+            carry = quotient;
+            i = i - 1;
+        }
+        
+        divisor = 10;
+        remainder = 0;
+        divident = carry;
+        quotient = 0;
+        integer_division(divident, divisor, quotient, remainder);
+        i = 0;
+        assign_at_index(A, new_A, i, j, N, remainder)
+        carry = quotient;
+        digit_count = digit_count + 1;
+
+        if (carry == 9) {
+            nines = nines + 1;
+        }
+        if (carry == 10) {
+            if (predigit != 0 | #pi_digits != 0 ) {
+                predigit = predigit + 1;
+                pi_digits^predigit;
+            }
+
+            i = nines;
+            while (i > 0) {
+                pi_digits = pi_digits^0;
+                i = i - 1
+            }
+            predigit = 0;
+            nines = 0;
+        }
+        if (carry != 10 & carry != 9) {
+            if (predigit != 0 | #pi_digits != 0) {
+                pi_digits = pi_digits^predigit;
+            }
+            predigit = carry;
+            if (nines != 0) {
+                i = nines;
+                while (i > 0) {
+                    pi_digits = pi_digits^9;
+                    i = i - 1
+                }
+                nines = 0;
+            }
+        }
+    }
+    
+    pi_digits = pi_digits^predigit
+    print pi_digits;
+    return;
+}
+
+int n;
+int N;
+list A;
+list pi_digits;
+int carry;
+int digit_count;
+int i;
+int x;
+int new_A;
+int j;
+int divident;
+int divisor;
+int remainder;
+int quotient;
+int nines;
+int predigit;
+
+n = 30;
+pi_spigot(n, N, A, pi_digits, carry, digit_count, i, x, new_A, j, divident, divisor, remainder, quotient, nines, predigit);
+halt;
