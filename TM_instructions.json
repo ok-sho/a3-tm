@@ -1,0 +1,162 @@
+{
+    "name": "M_PI_33_DIGITS",
+    "description": "Compute pi to 33 digits using spigot algorithm",
+    "params": {
+        "n_digits": 33,
+        "array_length": 110
+    },
+    "tape_markers": {
+        "START": 0,
+        "LEN": 1,
+        "ARRAY": 2,
+        "ARRAY_END": 111,
+        "PREDIGIT": 112,
+        "NINES": 113,
+        "OUTPUT": 114,
+        "WORK": 147,
+        "COUNTER": 147,
+        "i": 148,
+        "q": 149,
+        "d": 150
+    },
+    "initial_tape": {
+        "0": "START",
+        "1": 110,
+        "112": -1,
+        "113": 0,
+        "147": 0
+    },
+    "instructions": {
+        "start": [
+            "GOTO START",
+            "SET 0",
+            "GOTO LEN",
+            "SET 110",
+            "SET i 0",
+            "GOTO ARRAY",
+            "STATE STAGE_1_ARRAY_INIT"
+        ],
+        "STAGE_1_ARRAY_INIT": [
+            "SET 2",
+            "ADD i 1",
+            "IF i >= LEN STATE STAGE_2_MAIN_LOOP",
+            "MOVE_RIGHT",
+            "STATE STAGE_1_ARRAY_INIT"
+        ],
+        "STAGE_2_MAIN_LOOP": [
+            "IF COUNTER >= 33 STATE STAGE_11_FINALIZE",
+            "GOTO ARRAY",
+            "SET i 0",
+            "STATE STAGE_3_MULTIPLY"
+        ],
+        "STAGE_3_MULTIPLY": [
+            "MUL 10",
+            "ADD i 1",
+            "IF i >= LEN STATE STAGE_4_MOD_REDUCE",
+            "MOVE_RIGHT",
+            "STATE STAGE_3_MULTIPLY"
+        ],
+        "STAGE_4_MOD_REDUCE": [
+            "SET i LEN",
+            "SUB i 1",
+            "GOTO ARRAY",
+            "MOVE_RIGHT i",
+            "STATE STAGE_5_MOD_LOOP"
+        ],
+        "STAGE_5_MOD_LOOP": [
+            "READ",
+            "SET q HEAD",
+            "SET d i",
+            "MUL d 2",
+            "ADD d 1",
+            "MOD d",
+            "DIV q d",
+            "MUL q i",
+            "SUB i 1",
+            "MOVE_LEFT",
+            "ADD q",
+            "IF i <= 0 STATE STAGE_6_HANDLE_A0",
+            "STATE STAGE_5_MOD_LOOP"
+        ],
+        "STAGE_6_HANDLE_A0": [
+            "GOTO ARRAY",
+            "READ",
+            "SET q HEAD",
+            "DIV q 10",
+            "MOD 10",
+            "IF q == 9 STATE STAGE_7_PREDIGIT_9",
+            "IF q == 10 STATE STAGE_8_PREDIGIT_10",
+            "STATE STAGE_9_PREDIGITS_0_TO_8"
+        ],
+        "STAGE_7_PREDIGIT_9": [
+            "GOTO NINES",
+            "ADD 1",
+            "STATE STAGE_2_MAIN_LOOP"
+        ],
+        "STAGE_8_PREDIGIT_10": [
+            "GOTO PREDIGIT",
+            "READ",
+            "SET d HEAD",
+            "IF d != -1 STATE STAGE_8_ADD",
+            "STATE STAGE_8_PREDIGIT_10_B"
+        ],
+        "STAGE_8_ADD": [
+            "ADD d 1",
+            "GOTO OUTPUT",
+            "MOVE_RIGHT COUNTER",
+            "SET d",
+            "ADD COUNTER 1",
+            "STATE STAGE_8_PREDIGIT_10_B"
+        ],
+        "STAGE_8_PREDIGIT_10_B": [
+            "GOTO NINES",
+            "READ",
+            "IF HEAD == 0 STATE STAGE_10_DONE",
+            "GOTO OUTPUT",
+            "MOVE_RIGHT COUNTER",
+            "SET 0",
+            "ADD COUNTER 1",
+            "GOTO NINES",
+            "SUB 1",
+            "STATE STAGE_8_PREDIGIT_10_B"
+        ],
+        "STAGE_9_PREDIGITS_0_TO_8": [
+            "GOTO PREDIGIT",
+            "READ",
+            "IF HEAD == -1 STATE STAGE_9_PREDIGITS_0_TO_8_B",
+            "IF HEAD > 8 STATE ACCEPT",
+            "GOTO OUTPUT",
+            "MOVE_RIGHT COUNTER",
+            "SET HEAD",
+            "ADD COUNTER 1",
+            "STATE STAGE_9_PREDIGITS_0_TO_8_B"
+        ],
+        "STAGE_9_PREDIGITS_0_TO_8_B": [
+            "GOTO NINES",
+            "READ",
+            "IF HEAD == 0 STATE STAGE_10_DONE",
+            "GOTO OUTPUT",
+            "MOVE_RIGHT COUNTER",
+            "SET 9",
+            "ADD COUNTER 1",
+            "GOTO NINES",
+            "SUB 1",
+            "STATE STAGE_9_PREDIGITS_0_TO_8_B"
+        ],
+        "STAGE_10_DONE": [
+            "SET PREDIGIT q",
+            "SET NINES 0",
+            "STATE STAGE_2_MAIN_LOOP"
+        ],
+        "STAGE_11_FINALIZE": [
+            "GOTO PREDIGIT",
+            "READ",
+            "IF HEAD == -1 STATE ACCEPT",
+            "IF HEAD > 8 STATE ACCEPT",
+            "GOTO OUTPUT",
+            "MOVE_RIGHT COUNTER",
+            "SET HEAD",
+            "STATE ACCEPT"
+        ]
+    }
+}
