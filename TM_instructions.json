@@ -61,9 +61,9 @@
             "SUB i 1",
             "GOTO ARRAY",
             "MOVE_RIGHT i",
-            "STATE STAGE_5_MOD_LOOP"
+            "STATE STAGE_4_MOD_LOOP"
         ],
-        "STAGE_5_MOD_LOOP": [
+        "STAGE_4_MOD_LOOP": [
             "READ",
             "SET q HEAD",
             "SET d i",
@@ -75,15 +75,18 @@
             "SUB i 1",
             "MOVE_LEFT",
             "ADD q",
-            "IF i <= 0 STATE STAGE_6_HANDLE_A0",
-            "STATE STAGE_5_MOD_LOOP"
+            "IF i <= 0 STATE STAGE_5_HANDLE_A0",
+            "STATE STAGE_4_MOD_LOOP"
         ],
-        "STAGE_6_HANDLE_A0": [
+        "STAGE_5_HANDLE_A0": [
             "GOTO ARRAY",
             "READ",
             "SET q HEAD",
             "DIV q 10",
             "MOD 10",
+            "STATE STAGE_6_PREDIGIT_ROUTING"
+        ],
+        "STAGE_6_PREDIGIT_ROUTING": [
             "IF q == 9 STATE STAGE_7_PREDIGIT_9",
             "IF q == 10 STATE STAGE_8_PREDIGIT_10",
             "STATE STAGE_9_PREDIGITS_0_TO_8"
@@ -111,7 +114,7 @@
         "STAGE_8_PREDIGIT_10_B": [
             "GOTO NINES",
             "READ",
-            "IF HEAD == 0 STATE STAGE_10_DONE",
+            "IF HEAD == 0 STATE STAGE_10_MAIN_LOOP_END",
             "GOTO OUTPUT",
             "MOVE_RIGHT COUNTER",
             "SET 0",
@@ -134,7 +137,7 @@
         "STAGE_9_PREDIGITS_0_TO_8_B": [
             "GOTO NINES",
             "READ",
-            "IF HEAD == 0 STATE STAGE_10_DONE",
+            "IF HEAD == 0 STATE STAGE_10_MAIN_LOOP_END",
             "GOTO OUTPUT",
             "MOVE_RIGHT COUNTER",
             "SET 9",
@@ -143,7 +146,7 @@
             "SUB 1",
             "STATE STAGE_9_PREDIGITS_0_TO_8_B"
         ],
-        "STAGE_10_DONE": [
+        "STAGE_10_MAIN_LOOP_END": [
             "SET PREDIGIT q",
             "SET NINES 0",
             "STATE STAGE_2_MAIN_LOOP"

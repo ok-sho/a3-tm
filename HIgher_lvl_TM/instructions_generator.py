@@ -111,20 +111,20 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_3_MULTIPLY"
             ],
 
-            # STAGE 4: Set up for modulo reduction (start from end of array)
+            # STAGE 4A: Set up for modulo reduction (start from end of array)
             # Prepares to iterate backwards through the array
             "STAGE_4_MOD_REDUCE": [
                 "SET i LEN",
                 "SUB i 1",
                 "GOTO ARRAY",
                 "MOVE_RIGHT i",
-                "STATE STAGE_5_MOD_LOOP"
+                "STATE STAGE_4_MOD_LOOP"
             ],
 
-            # STAGE 5: Modulo reduction with carry propagation
+            # STAGE 4B: Modulo reduction with carry propagation
             # For each element: compute quotient and remainder, propagate carry leftward
             # Formula: a[i] = a[i] % (2*i+1), carry = (a[i] / (2*i+1)) * i
-            "STAGE_5_MOD_LOOP": [
+            "STAGE_4_MOD_LOOP": [
                 "READ",
                 "SET q HEAD",
                 "SET d i",
@@ -136,21 +136,26 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "SUB i 1",
                 "MOVE_LEFT",
                 "ADD q",
-                "IF i <= 0 STATE STAGE_6_HANDLE_A0",
-                "STATE STAGE_5_MOD_LOOP"
+                "IF i <= 0 STATE STAGE_5_HANDLE_A0",
+                "STATE STAGE_4_MOD_LOOP"
             ],
 
-            # STAGE 6: Extract digit from a[0] and route to appropriate handler
+            # STAGE 5: Extract digit from a[0] and route to appropriate handler
             # q = a[0] / 10 gives us the next digit (predigit)
-            # If q=9: buffer it (might need adjustment if next digit is 10)
-            # If q=10: need to increment previous digit and output 0s
-            # If q=0-8: safe to output
-            "STAGE_6_HANDLE_A0": [
+            "STAGE_5_HANDLE_A0": [
                 "GOTO ARRAY",
                 "READ",
                 "SET q HEAD",
                 "DIV q 10",
                 "MOD 10",
+                "STATE STAGE_6_PREDIGIT_ROUTING"
+            ],
+            
+            # STAGE 6: Handle the predigit based on its value
+            # If q=9: buffer it (might need adjustment if next digit is 10)
+            # If q=10: need to increment previous digit and output 0s
+            # If q=0-8: safe to output
+            "STAGE_6_PREDIGIT_ROUTING": [
                 "IF q == 9 STATE STAGE_7_PREDIGIT_9",
                 "IF q == 10 STATE STAGE_8_PREDIGIT_10",
                 "STATE STAGE_9_PREDIGITS_0_TO_8"
@@ -189,7 +194,7 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
             "STAGE_8_PREDIGIT_10_B": [
                 "GOTO NINES",
                 "READ",
-                "IF HEAD == 0 STATE STAGE_10_DONE",
+                "IF HEAD == 0 STATE STAGE_10_MAIN_LOOP_END",
                 "GOTO OUTPUT",
                 "MOVE_RIGHT COUNTER",
                 "SET 0",
@@ -218,7 +223,7 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
             "STAGE_9_PREDIGITS_0_TO_8_B": [
                 "GOTO NINES",
                 "READ",
-                "IF HEAD == 0 STATE STAGE_10_DONE",
+                "IF HEAD == 0 STATE STAGE_10_MAIN_LOOP_END",
                 "GOTO OUTPUT",
                 "MOVE_RIGHT COUNTER",
                 "SET 9",
@@ -230,7 +235,7 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
 
             # STAGE 10: Finish iteration
             # Store current predigit for next iteration and reset NINES counter
-            "STAGE_10_DONE": [
+            "STAGE_10_MAIN_LOOP_END": [
                 "SET PREDIGIT q",
                 "SET NINES 0",
                 "STATE STAGE_2_MAIN_LOOP"
