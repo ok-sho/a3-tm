@@ -1,17 +1,31 @@
+import time
+from VisualTM import VisualTM
 
 class HigherLevelTM:
     # Instruction limit cause I did crash VS Code while troubleshooting lol
     INSTRUCTION_LIMIT = 100000
-    def __init__(self, turing_machine):
+
+    def __init__(self, turing_machine, SPEED, VISUALS):
         self.instructions = turing_machine["instructions"]
         self.state = "start"
         self.headPos = 0
         self.head = None
         self.tape = []
-        
-        self.variables = turing_machine['tape_markers']
 
         self.currInstruction = 0
+        self.variables = turing_machine['tape_markers']
+
+        # --------------------------------------------------------------------------------
+        #                    PARAMETERS
+        # --------------------------------------------------------------------------------
+        # Wait time between instructions in seconds
+        self.SPEED = SPEED
+        # Wether or not to display visuals
+        self.VISUALS = VISUALS
+
+
+        # Initialize visual display
+        if VISUALS: self.visual = VisualTM(SPEED)
 
     def read_instruction(self, instruction):
         print(instruction)
@@ -22,7 +36,6 @@ class HigherLevelTM:
         if len(instruction.split()) > 1: 
             for parameter in instruction.split()[1:]:
                 parameters.append(parameter)
-        print(parameters)
 
         # FOR ALL THESE INSTRUCTIONS, value can be either an integer or a variable name <--- IMPORTANT
         match type:
@@ -73,11 +86,15 @@ class HigherLevelTM:
             case "MOVE":
                 self.headPos = self.readValue(parameters[0])
                 self.checkArrSize(self.headPos)
+
+                self.updateDisplay() # BAO
             
             # Move head to location of specific variable/marker
             case "GOTO":
                 self.headPos = self.variables[parameters[0]]
                 self.checkArrSize(self.headPos)
+
+                self.updateDisplay() # BAO
 
             # Move left by 1 (MOVE_LEFT) or move left by value (MOVE_LEFT <value>)
             case "MOVE_LEFT":
@@ -86,6 +103,8 @@ class HigherLevelTM:
                     self.checkArrSize(self.headPos)
                 else:
                     self.headPos -= self.readValue(parameters[0])
+                
+                self.updateDisplay() # BAO
             
             # Move right by 1 (MOVE_RIGHT) or move right by value (MOVE_LEFT <value>)
             case "MOVE_RIGHT":
@@ -94,6 +113,8 @@ class HigherLevelTM:
                     self.checkArrSize(self.headPos)
                 else:
                     self.headPos += self.readValue(parameters[0])
+                
+                self.updateDisplay() # BAO
             
             # Conditional statements (IF <value1> <compare type> <value2> <instruction>)
             case "IF":
@@ -135,10 +156,7 @@ class HigherLevelTM:
             case "STATE": 
                 self.state = parameters[0]
                 self.currInstruction = -1  # Will be incremented to 0 after this function
-
-                # print(self.tape[self.variables["ARRAY"]:self.variables["ARRAY_END"]+1])
-                # print(self.tape[self.variables["PREDIGIT"]])
-                # print(self.tape[self.variables["NINES"]])
+                
                 # print(self.tape[self.variables["OUTPUT"]:self.variables["WORK"]])
                 print(self.tape) # <------------------------------------------------------------ PRINT TAPE
 
@@ -146,14 +164,18 @@ class HigherLevelTM:
     # Main loop of executing instructions
     def executeInstructions(self):
         totalExecuted = 0
+
+        self.initiateDisplay()
         while(self.state != "ACCEPT" and totalExecuted <= self.INSTRUCTION_LIMIT ):
             
             self.read_instruction(self.getInstruction())
-            self.updateDisplay() # HARVIE
+            # self.updateDisplay() # BAO
             self.currInstruction += 1
             
             totalExecuted += 1
-        
+            time.sleep(self.SPEED)
+
+
         output = str(self.tape[self.variables["OUTPUT"]+1]) + '.'
         for char in self.tape[self.variables["OUTPUT"]+2:self.variables["WORK"]]:
             output += str(char)
@@ -187,9 +209,12 @@ class HigherLevelTM:
         elif value == "HEAD":
             return self.head
 
-        
-    def updateDisplay(self): # HARVIE
-        self.tape
-        self.headPos
+    def initiateDisplay(self): # BAO
+        if self.VISUALS:
+            self.visual.initiate()
+
+    def updateDisplay(self):  # BAO
+        if self.VISUALS:
+            self.visual.update(self.tape, self.headPos, self.state, self.currInstruction, self.instructions)
 
 
