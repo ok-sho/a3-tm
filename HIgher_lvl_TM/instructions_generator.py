@@ -71,6 +71,7 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
         },
         
         "instructions": {
+            # Initialization: Set up the tape and initialize the array
             "start": [
                 "GOTO START",
                 "SET 0",
@@ -81,6 +82,8 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_1_ARRAY_INIT"
             ],
 
+            # STAGE 1: Initialize array with 2s (representing initial fraction 2/1)
+            # The spigot algorithm starts with all array elements set to 2
             "STAGE_1_ARRAY_INIT":[
                 "SET 2",
                 "ADD i 1",
@@ -89,6 +92,8 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_1_ARRAY_INIT"
             ],
 
+            # STAGE 2: Main loop - check if we've generated enough digits, otherwise continue
+            # Loop iterates once per digit of pi
             "STAGE_2_MAIN_LOOP": [
                 f"IF COUNTER >= {n_digits} STATE STAGE_11_FINALIZE",
                 "GOTO ARRAY",
@@ -96,6 +101,8 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_3_MULTIPLY"
             ],
 
+            # STAGE 3: Multiply all array elements by 10
+            # This is the "multiply" step in the spigot algorithm
             "STAGE_3_MULTIPLY":  [
                 "MUL 10",
                 "ADD i 1",
@@ -104,6 +111,8 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_3_MULTIPLY"
             ],
 
+            # STAGE 4: Set up for modulo reduction (start from end of array)
+            # Prepares to iterate backwards through the array
             "STAGE_4_MOD_REDUCE": [
                 "SET i LEN",
                 "SUB i 1",
@@ -112,6 +121,9 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_5_MOD_LOOP"
             ],
 
+            # STAGE 5: Modulo reduction with carry propagation
+            # For each element: compute quotient and remainder, propagate carry leftward
+            # Formula: a[i] = a[i] % (2*i+1), carry = (a[i] / (2*i+1)) * i
             "STAGE_5_MOD_LOOP": [
                 "READ",
                 "SET q HEAD",
@@ -128,6 +140,11 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_5_MOD_LOOP"
             ],
 
+            # STAGE 6: Extract digit from a[0] and route to appropriate handler
+            # q = a[0] / 10 gives us the next digit (predigit)
+            # If q=9: buffer it (might need adjustment if next digit is 10)
+            # If q=10: need to increment previous digit and output 0s
+            # If q=0-8: safe to output
             "STAGE_6_HANDLE_A0": [
                 "GOTO ARRAY",
                 "READ",
@@ -139,12 +156,19 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_9_PREDIGITS_0_TO_8"
             ],
 
+            # STAGE 7: Handle predigit = 9
+            # Buffer the 9 (increment NINES counter) without outputting yet
+            # We need to wait to see if the next digit is 10 (which would carry)
             "STAGE_7_PREDIGIT_9": [
                 "GOTO NINES",
                 "ADD 1",
                 "STATE STAGE_2_MAIN_LOOP"
             ],
 
+            # STAGE 8: Handle predigit = 10 (overflow case)
+            # Need to increment the previous buffered digit and output 0s for all the 9s
+            # STAGE_8_ADD: Increment previous digit by 1
+            # STAGE_8_PREDIGIT_10_B: Output 0s for each buffered 9
             "STAGE_8_PREDIGIT_10": [
                 "GOTO PREDIGIT",
                 "READ",
@@ -175,6 +199,10 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_8_PREDIGIT_10_B"
             ],
 
+            # STAGE 9: Handle predigit = 0-8 (normal case)
+            # Output the previous buffered digit (if any) and output 9s for each buffered 9
+            # STAGE_9_PREDIGITS_0_TO_8: Output previous digit
+            # STAGE_9_PREDIGITS_0_TO_8_B: Output all buffered 9s
             "STAGE_9_PREDIGITS_0_TO_8": [
                 "GOTO PREDIGIT",
                 "READ",
@@ -200,12 +228,16 @@ def generate_pi_tm_macro(n_digits: int = 33) -> Dict[str, Any]:
                 "STATE STAGE_9_PREDIGITS_0_TO_8_B"
             ],
 
+            # STAGE 10: Finish iteration
+            # Store current predigit for next iteration and reset NINES counter
             "STAGE_10_DONE": [
                 "SET PREDIGIT q",
                 "SET NINES 0",
                 "STATE STAGE_2_MAIN_LOOP"
             ],
 
+            # STAGE 11: Output final buffered digit and accept
+            # After generating all digits, output any remaining buffered digit
             "STAGE_11_FINALIZE": [
                 "GOTO PREDIGIT",
                 "READ",

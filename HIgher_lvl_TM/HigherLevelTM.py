@@ -1,5 +1,6 @@
 
 class HigherLevelTM:
+    # Instruction limit cause I did crash VS Code while troubleshooting lol
     INSTRUCTION_LIMIT = 100000
     def __init__(self, turing_machine):
         self.instructions = turing_machine["instructions"]
@@ -68,15 +69,17 @@ class HigherLevelTM:
                 else:
                     self.setVar(parameters[0], self.readValue(parameters[1]))
 
-            # Move head to absolute position or relative to section start
+            # Move head to position (index)
             case "MOVE":
                 self.headPos = self.readValue(parameters[0])
                 self.checkArrSize(self.headPos)
-
+            
+            # Move head to location of specific variable/marker
             case "GOTO":
                 self.headPos = self.variables[parameters[0]]
                 self.checkArrSize(self.headPos)
 
+            # Move left by 1 (MOVE_LEFT) or move left by value (MOVE_LEFT <value>)
             case "MOVE_LEFT":
                 if len(parameters) == 0:
                     self.headPos -= 1
@@ -84,6 +87,7 @@ class HigherLevelTM:
                 else:
                     self.headPos -= self.readValue(parameters[0])
             
+            # Move right by 1 (MOVE_RIGHT) or move right by value (MOVE_LEFT <value>)
             case "MOVE_RIGHT":
                 if len(parameters) == 0:
                     self.headPos += 1
@@ -127,7 +131,7 @@ class HigherLevelTM:
                         if value1 > value2:
                             instruction = " ".join(parameters[3:])
                             self.read_instruction(instruction)
-
+            # Change state (STATE <new state>)
             case "STATE": 
                 self.state = parameters[0]
                 self.currInstruction = -1  # Will be incremented to 0 after this function
@@ -139,16 +143,16 @@ class HigherLevelTM:
                 print(self.tape) # <------------------------------------------------------------ PRINT TAPE
 
 
-
+    # Main loop of executing instructions
     def executeInstructions(self):
-        i = 0
-        while(self.state != "ACCEPT" and i <= self.INSTRUCTION_LIMIT ):
+        totalExecuted = 0
+        while(self.state != "ACCEPT" and totalExecuted <= self.INSTRUCTION_LIMIT ):
             
             self.read_instruction(self.getInstruction())
             self.updateDisplay() # HARVIE
             self.currInstruction += 1
-
-            i += 1
+            
+            totalExecuted += 1
         
         output = str(self.tape[self.variables["OUTPUT"]+1]) + '.'
         for char in self.tape[self.variables["OUTPUT"]+2:self.variables["WORK"]]:
