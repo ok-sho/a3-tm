@@ -27,6 +27,10 @@
 - Presentation slides
 - Research & planning
 
+### Natasha Maundu
+- Formal Verification Research (Coq/Rocq Prover)
+- Theoretical foundations and verification methods
+
 # References
 
 Anthropic. (2025). _Claude_ [Large language model]. https://claude.ai
