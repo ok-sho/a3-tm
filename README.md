@@ -7,6 +7,7 @@
 
 ### Nikita Egorov
 - Low-level π TM using Laconic (see [separate README](low-level/README.md))
+- Presentation slides
 - Research & planning
 
 ### Gabriel Gourde
