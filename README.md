@@ -30,7 +30,6 @@
 ### Natasha Maundu
 - Formal Verification Research (Coq/Rocq Prover)
 - Theoretical foundations and verification methods
-- Report: [Coq programming language](docs/Coq programming language.docx)
 
 # References
 
